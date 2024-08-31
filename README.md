@@ -1,2 +1,2 @@
-# Cohot3_Assignment
+# Cohort3_Assignment
 in Class Assignments
