@@ -1,77 +1,232 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.6/axios.min.js"></script>
-    <title>Auth Web</title>
-    <script>
-        async function signup(){
-            const username = document.getElementById("signup-username").value;
-            const password = document.getElementById("signup-password").value;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.6/axios.min.js"></script>
+  <title>Auth Web</title>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200&display=swap");
 
-            // now send request to backend
-            await axios.post("http://localhost:3000/signup",{
-                username:username,
-                password:password
-            })
-            alert("You are signed in");
-        }
+    * {
+      font-family: "Poppins", system-ui;
+      font-weight: 500;
+      font-style: normal;
+    }
 
-        async function signin(){
-            const username = document.getElementById("signin-username").value;
-            const password = document.getElementById("signin-password").value;
+    body {
+      background-color: #f0f0f0;
+      /* margin: 0; */
+    }
 
-            // now send request to backend
-            const response = await axios.post("http://localhost:3000/signin",{
-                username:username,
-                password:password
-            })
-            console.log(response.data);
-            if(response.data.message === 'Credential incorrect')
-                alert("wrong credentials");
-            else{
-                localStorage.setItem("token",response.data.token);
-                alert("you are signed in");
-            
-            }
-        }
-        
-        async function getUserInformation(){
-            const response = await axios.get("http://localhost:3000/me",{
-                headers:{
-                    token : localStorage.getItem("token")
-                }
-            }) 
+    .body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background-color: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      width: 300px;
+    }
+
     
-            document.getElementById("information").innerHTML = "Username: " + response.data.person
-        }
-    
-        function logout(){
-            localStorage.removeItem("token")
-        }
-    </script>
+    h1 {
+      text-align: center;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      margin-bottom: 0.5rem;
+      color: #666;
+    }
+
+    input {
+      padding: 0.5rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      padding: 0.75rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    button:hover {
+      background-color: red;
+    }
+
+    .logout {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    a {
+      color: #007bff;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+  <script>
+    async function signup() {
+      event.preventDefault(); // Prevent the default form submission and reloading of page
+
+      const username = document.getElementById("signup-username").value;
+      const password = document.getElementById("signup-password").value;
+      const re_password = document.getElementById("re-signup-passoword").value;
+
+      if(password!=re_password){
+        alert("Password is not mathching")
+        return;
+      }
+      // now send request to backend
+      await axios.post("http://localhost:3000/signup", {
+        username: username,
+        password: password,
+      });
+      alert("You are signed in");
+    }
+
+    async function signin() {
+      event.preventDefault(); // Prevent the default form submission and reloading of page
+
+      const username = document.getElementById("signin-username").value;
+      const password = document.getElementById("signin-password").value;
+
+      // now send request to backend
+      const response = await axios.post("http://localhost:3000/signin", {
+        username: username,
+        password: password,
+      });
+      console.log(response.data);
+      if (response.data.message === "Credential incorrect")
+        alert("wrong credentials");
+      else {
+        localStorage.setItem("token", response.data.token);
+        alert("you are signed in");
+        areYouLoggedin();
+      }
+    }
+
+    async function getUserInformation() {
+      const response = await axios.get("http://localhost:3000/me", {
+        headers: {
+          token: localStorage.getItem("token"),
+        },
+      });
+
+      document.getElementById("information").innerHTML = "Hii "+ response.data.person+" Thank you for login!";
+
+    }
+
+    function logout() {
+      localStorage.removeItem("token");
+      areYouLoggedin();
+    }
+
+    function toggleForms() {
+      const siginForm = document.getElementById("signin-form");
+      const signupForm = document.getElementById("signup-form");
+      if(signupForm.style.display === 'none'){
+        signupForm.style.display = 'block';
+        siginForm.style.display = 'none';
+      }
+      else{
+        signupForm.style.display = 'none';
+        siginForm.style.display = 'block';
+      }
+    }
+  
+    function areYouLoggedin(){
+    if(localStorage.getItem("token")){
+      console.log("token is there");
+      const siginForm = document.getElementById("signin-form");
+      const signupForm = document.getElementById("signup-form");
+      const user = document.getElementById("user-information");
+      signupForm.style.display = 'none';
+      siginForm.style.display = 'none';
+      user.style.display = 'block';
+    }
+    else {
+    console.log('toke is not there ')
+    const siginForm = document.getElementById("signin-form");
+      const signupForm = document.getElementById("signup-form");
+      const user = document.getElementById("user-information");
+      signupForm.style.display = 'none';
+      user.style.display = 'none';
+      siginForm.style.display = 'block';
+    }
+  }
+  </script>
 </head>
-<body>
-    <div>
-        Signup
-        <input id="signup-username" type="text" name="username" placeholder="Username">
-        <input id="signup-password" type="password" name="password" placeholder="Password">
-        <button onclick="signup()">Signup</button>
-    </div>
-    <div>
-        Signin
-        <input id="signin-username" type="text" name="username" placeholder="Username">
-        <input id="signin-password" type="text" name="password" placeholder="Password">
-        <button onclick="signin()">Signin</button>
-    </div>
-    <div>
-        User infromation:
+
+<body onload="areYouLoggedin()">
+
+  <div class="logout">
+    <button onclick="logout()">Logout</button>
+  </div>
+
+  <div class="body">
+    <div class="container">
+      <div id="signup-form">
+        <h1>Sign up</h1>
+        <form onsubmit="signup()">
+          <!-- using for to link label and input space  -->
+          <label for="signup-username">Email:</label>
+          <input id="signup-username" type="text" name="username" placeholder="Enter Email" required />
+
+          <label for="signup-password">Password:</label>
+          <input id="signup-password" type="password" name="password" placeholder="Enter Password" required />
+          <label for="re-signup-password">Confirm Password:</label>
+          <input id="re-signup-passoword" type="password" name="password" placeholder="Confirm Password" required />
+          <button type="submit">Signup</button>
+        </form>
+        <div class="toggle-link">
+          Already have an accout?
+          <a onclick="toggleForms()">Sign in</a>
+        </div>
+      </div>
+
+      <div id="signin-form">
+        <h1>Sign in</h1>
+        <form onsubmit="signin()">
+          <label for="signin-username">Email: </label>
+          <input id="signin-username" type="text" name="username" placeholder="Enter Email" />
+          <label for="signin-password">Password: </label>
+          <input id="signin-password" type="password" name="password" placeholder="Password" />
+          <button type="submit">Signin</button>
+        </form>
+        <div class="toggle-link">
+          Don't have an account?
+          <a onclick="toggleForms()">Sign up</a>
+        </div>
+      </div>
+
+      <div id="user-information">
         <div id="information"></div>
-        <button onclick="getUserInformation()">getUser</button>
+        <button id="user-button" onclick="getUserInformation()">getUser</button>
+      </div>
     </div>
-    <div>
-        <button onclick="logout()">Logout</button>
-    </div>
+  </div>
 </body>
+
 </html>
