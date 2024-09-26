@@ -8,6 +8,18 @@ const port = 3000;
 app.use(express.json());
 
 
+function auth(req, res, next) {
+    const token = req.headers.authorization;
+    try{
+    const response = jwt.verify(token, JWT_SECRET);
+        req.user = response.id;
+        next();
+    } catch(e) {
+        return res.status(403).json({
+            message: "Incorrect creds"
+        })
+    }
+}
 // Routes
 app.post('/signup',async function(req, res)  {
     const email = req.body.email;
@@ -34,12 +46,13 @@ app.post('/login',async function(req,res){
     console.log(user);
 
     if(user){
+    
         const token = jwt.sign({
             id: user._id
-        });
+        },JWT_SECRET);
         res.json({
             token:token
-        })
+        }) 
     }
     else{
         res.status(403).json({
@@ -48,8 +61,10 @@ app.post('/login',async function(req,res){
     }
 })
 
-app.post('/todo',function(req,res){
-
+app.post('/todo',auth,function(req,res){
+    return res.json({
+        msg:"hi there" + req.user
+    })
 })
 
 app.get('/todos',function(req,res){
