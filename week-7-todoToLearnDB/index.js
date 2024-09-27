@@ -1,52 +1,54 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const JWT_SECRET = "HII";
 const {UserModel,TodoModel} = require('./db');
+const {auth,JWT_SECRET} = require('./auth');
+const bcrypt = require('bcrypt');
+
 const app = express();
 const port = 3000;
 
 app.use(express.json());
 
-
-function auth(req, res, next) {
-    const token = req.headers.authorization;
-    try{
-    const response = jwt.verify(token, JWT_SECRET);
-        req.user = response.id;
-        next();
-    } catch(e) {
-        return res.status(403).json({
-            message: "Incorrect creds"
-        })
-    }
-}
 // Routes
 app.post('/signup',async function(req, res)  {
-    const email = req.body.email;
-    const password = req.body.password;
-    const name = req.body.name;
+    const {email,password,name} = req.body;
 
+    try{
+    //Hashing password 
+    // 5 is kitni baar hash krwani so it become difficult to bruteForce
+    const hashedPassword = await bcrypt.hash(password,5);
     await UserModel.create({
         email:email,
-        password:password,
+        password:hashedPassword,
         name:name
     })
-    res.json({
+    return res.json({
         message:"You are logged in"
-    })
+    })}catch(e){
+        return res.status(403).json({
+            message:"User alerady exists"
+        })
+    }
 });
 
 app.post('/login',async function(req,res){
     const {email,password} = req.body;
+
+    // if it doesn't find the user, it will return null
     const user = await UserModel.findOne({
-        email:email,
-        password:password
+        email:email
     })
+    // First check if user's email is there in database
+    if(!user){
+        return res.status(403).json({
+            message:"User does not exist in our db"
+        })
+    }
 
-    console.log(user);
+    // now check the password
+    const passwordMatch = await bcrypt.compare(password,user.password);  // if password is mathched then it stores true else false
 
-    if(user){
-    
+    if(passwordMatch){
         const token = jwt.sign({
             id: user._id
         },JWT_SECRET);
@@ -56,7 +58,7 @@ app.post('/login',async function(req,res){
     }
     else{
         res.status(403).json({
-            message:"incorrect credentials"
+            message:"incorrect Password"
         })
     }
 })

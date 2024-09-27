@@ -5,15 +5,15 @@ const ObjectId = mongoose.ObjectId;
 mongoose.connect("mongodb+srv://niteshsengar9831:oPNhUMViFEWtLWfV@cluster0.dtw65.mongodb.net/todo-basic-test")
 
 const User = new Schema({
-    email:String,
+    name:String,
+    email:{type:String,unique:true}, 
     password:String,
-    name:String
 })
 
 const Todo = new Schema({
+    userId: ObjectId,
     title:String,
-    done:Boolean,
-    userId: ObjectId
+    done:Boolean
 })
 
 // user collection mein with help of UserModel User type ka data daal do
